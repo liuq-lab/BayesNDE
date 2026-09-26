@@ -1,0 +1,121 @@
+# Shared model and training defaults; drivers override per experiment.
+gpu:
+  required: false
+  memory_growth: true
+data:
+  name: indep_gmm
+  seed: 1024
+  n: 20000
+  dim: 10
+  sd: 0.1
+  n_components: 3
+  bound: 1.0
+grid:
+  x1_min: -1.5
+  x1_max: 1.5
+  x2_min: -1.5
+  x2_max: 1.5
+  n: 32
+model:
+  dataset: BGM_indep_gmm
+  save_res: false
+  save_model: false
+  use_bnn: false
+  x_dim: 10
+  z_dim: 10
+  lr_theta: 1.0e-06
+  lr_z: 1.0e-07
+  g_units:
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  kl_weight: 5.0e-05
+  lr: 0.001
+  g_d_freq: 1
+  use_z_rec: true
+  alpha: 0.0
+  cycle_weight: 5.0
+  x_cycle_weight: 3.0
+  z_cycle_weight: 1.0
+  g_adv_weight: 1.0
+  e_adv_weight: 1.0
+  marginal_moment_weight: 0.0
+  covariance_weight: 0.0
+  marginal_mmd_weight: 0.0
+  decorrelation_weight: 0.3
+  mmd_scales:
+  - 0.05
+  - 0.1
+  - 0.2
+  - 0.5
+  - 1.0
+  x_cycle_use_mean: false
+  z_cycle_use_mean: false
+  variance_target: 0.01
+  variance_target_weight: 0.0
+  gamma: 0
+  e_units:
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  - 256
+  dz_units:
+  - 256
+  - 256
+  - 128
+  - 64
+  dx_units:
+  - 256
+  - 256
+  - 128
+  - 64
+  lr_schedule: constant
+  lr_decay_power: 0.6
+  lr_decay_timescale: 10.0
+  decorrelation_target: train
+  weight_decay: 0.0
+  variance_log_target: 0.01
+  variance_log_target_weight: 0.01
+  variance_log_eps: 1.0e-08
+training:
+  batch_size: 256
+  epochs: 600
+  epochs_per_eval: 1
+  use_egm_init: true
+  egm_only: false
+  egm_n_iter: 22000
+  egm_batches_per_eval: 1000
+  verbose: 1
+density:
+  K: 5
+  S: 20000
+  nu: 3.0
+  epsilon: 0.05
+  n_repeats: 1
+  eval_batch_size: 1024
+  likelihood: gaussian
+  variance_floor: 0.01
+  seed: 42
+  save_every: 25
+  test_log_likelihood_points: 2000
+generation_diagnostics:
+  n_samples: 5000
+outputs:
+  cmap_density: Blues
+  cmap_log_px: viridis
+  cmap_ess: cividis
+  cmap_iter: plasma
+  cmap_converged: Greens

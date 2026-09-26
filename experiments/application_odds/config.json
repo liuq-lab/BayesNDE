@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "archive": {
+    "url": "https://zenodo.org/records/4559067/files/ODDS.tar.gz?download=1",
+    "md5": "fb70bbb6e13290152bec77e41ad60641",
+    "filename": "ODDS.tar.gz"
+  },
+  "datasets": {
+    "shuttle": {
+      "display": "Shuttle",
+      "relative_path": "ODDS/Shuttle/data.npz",
+      "file_md5": "c9adbbee5ffd83e1095360ac952ec74e",
+      "n_total": 49097,
+      "dimension": 9,
+      "n_train": 39770,
+      "n_validation": 4418,
+      "n_test": 4909,
+      "n_test_anomalies": 365
+    }
+  },
+  "methods": [
+    {
+      "id": "bgm_bs",
+      "display": "BayesNDE"
+    }
+  ]
+}

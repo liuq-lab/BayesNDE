@@ -1,0 +1,49 @@
+# Shared bridge-sampling and posterior-sampling defaults.
+
+model_setting:
+  params_override:
+    use_bnn: false
+    save_model: false
+    save_res: false
+  load_encoder: true
+
+hmc_settings:
+  M: 1600
+  burn_in: 800
+  step_size: 0.003
+  num_leapfrog_steps: 10
+  target_accept_prob: 0.75
+  num_chains: 4
+  initial_state: encoder
+  initial_state_scale: 0.01
+  min_effective_samples: 0
+  max_retries: 0
+  retry_multiplier: 1.5
+  strict_ess: false
+  proposal_covariance_floor: 0.001
+
+density_bridge_eval:
+  K: 5
+  S: 20000
+  nu: 3.0
+  epsilon: 0.05
+  tol: 1.0e-5
+  max_iter: 1000
+  fit_fraction: 0.5
+  use_neff: true
+  n_repeats: 1
+  likelihood: gaussian
+  eval_batch_size: 1024
+  variance_floor: 1.0e-6
+  seed: 42
+  save_every: 25
+  return_proposal: false
+
+density_eval:
+  likelihood: gaussian
+  variance_floor: 1.0e-6
+  seed: 42
+
+run_management:
+  save_documents: true
+  save_dir: density_outputs/bridge

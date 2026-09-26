@@ -1,0 +1,52 @@
+seed: 0
+data:
+  train_size: 55000
+  validation_size: 5000
+  test_size: 10000
+  split_seed: 20260916
+  pixel_scale: unit_interval_grayscale
+model:
+  z_dim: 10
+  filters: 32
+  discriminator_filters: 32
+  label_conditioning: one_hot
+  lr: 0.001
+  lr_theta: 0.001
+  lr_z: 0.001
+  variance_floor: 0.0001
+  variance_target: 0.01
+  variance_penalty_weight: 0.1
+  prior_adv_weight: 0.1
+  prior_cycle_weight: 0.1
+  egm_variance_weight: 0.01
+  likelihood: logistic_normal_bernoulli_approx
+  mean_head: stochastic_logit
+  variance_head: capped_softplus_logit_variance
+  logit_variance_ceiling: 4.0
+training:
+  batch_size: 32
+  egm_iterations: 50000
+  iterative_epochs: 500
+  checkpoint_every: 50
+selection:
+  encoder_nll_candidates: 3
+  validation_points_per_class: 5
+  hmc_chains: 4
+  hmc_burn_in: 200
+  hmc_posterior_samples: 400
+  proposal_samples: 2000
+bridge:
+  components: 5
+  student_t_df: 3.0
+  defensive_prior_weight: 0.05
+  covariance: fitted_full
+  hmc_chains: 4
+  hmc_burn_in: 400
+  hmc_posterior_samples: 800
+  hmc_step_size: 0.003
+  hmc_leapfrog_steps: 10
+  proposal_samples: 5000
+  fit_fraction: 0.5
+  tolerance: 1.0e-05
+  max_iterations: 1000
+  target_acceptance: 0.75
