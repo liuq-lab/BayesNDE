@@ -1,0 +1,106 @@
+# BayesNDE tutorial: involute distribution, p = 2 (Figure 2a of the paper).
+# Settings of `python -m experiments.simulation.involute`, with the iterative learning rate
+# fixed at the value that run selected (lr1e-6), as in involute_genrank_v1/test/lr1e-6_e400.
+
+data:                            # bayesnde.data.samplers.build_sampler
+  name: involute
+  seed: 1024
+  n: 20000                       # 81% train / 9% validation / 10% test
+  dim: 2
+  theta: 6.283185307179586       # R ~ Uniform(0, 2 pi)
+  scale: 2.0                     # centre (r sin 2r, r cos 2r)
+  sigma: 0.4
+
+model:                           # bayesnde.training.generation_optimized.build_bgm_model
+  dataset: BGM_involute
+  output_dir: outputs/tutorial/involute_2d
+  random_seed: 1024
+  use_bnn: false
+  save_model: true
+  save_res: false
+  x_dim: 2
+  z_dim: 2
+  g_network_type: mlp            # five width-256 hidden layers (p <= 10)
+  e_network_type: mlp
+  g_units: [256, 256, 256, 256, 256]
+  e_units: [256, 256, 256, 256, 256]
+  dx_units: [256, 256, 128, 64]
+  dz_units: [256, 256, 128, 64]
+  lr: 1.0e-3                     # EGM warm start
+  lr_theta: 1.0e-6               # iterative updating, generator
+  lr_z: 1.0e-7                   # iterative updating, latent variables
+  g_d_freq: 1
+  gamma: 0.0
+  alpha: 0.0
+  g_adv_weight: 1.0              # lambda_adv,x
+  e_adv_weight: 1.0              # lambda_adv,z
+  x_cycle_weight: 1.0            # lambda_rec,x
+  z_cycle_weight: 1.0            # lambda_rec,z
+  decorrelation_weight: 0.3      # lambda_corr
+  decorrelation_target: train
+  marginal_mmd_weight: 0.0       # lambda_MMD,marg
+  mmd_scales: [0.05, 0.1, 0.2, 0.5, 1.0]
+  variance_log_target: 0.01
+  variance_log_target_weight: 0.01   # lambda_var (EGM and iterative updating)
+  variance_log_eps: 1.0e-8
+
+training:                        # stage 1, EGM warm start
+  batch_size: 256
+  egm_n_iter: 22000
+  egm_batches_per_eval: 1000     # checkpoint and diagnostics interval
+
+iterative:                       # stage 2, iterative updating
+  batch_size: 256
+  epochs: 3000
+  save_epochs: [0, 1, 10, 25, 50, 100, 200, 400, 700, 1000, 1500, 2000, 2500, 3000]
+  seed: 711024
+  lr_schedule: constant
+  lr_decay_power: 0.6
+  lr_decay_timescale: 10.0
+  optimizer: adamw
+  weight_decay: 1.0e-5
+  iterative_prior_mmd_weight: 1000.0     # lambda_PP
+  iterative_empirical_corr_weight: 0.3   # lambda_corr^iter
+
+generation_diagnostics:          # validation diagnostics used for checkpoint selection
+  n_samples: 5000
+  plots_enabled: false
+  umap_enabled: false
+  plot_reference_split: validation
+
+hmc_settings:                    # (a) posterior sampling
+  M: 1600                        # retained draws over all chains
+  burn_in: 800
+  num_chains: 4
+  step_size: 0.003
+  num_leapfrog_steps: 10
+  target_accept_prob: 0.75
+  initial_state: encoder
+  initial_state_scale: 0.01
+  min_effective_samples: 0
+  max_retries: 0
+  retry_multiplier: 1.5
+  strict_ess: false
+  proposal_covariance_floor: 1.0e-3
+
+density_bridge_eval:             # (b) adaptive proposal and (c) bridge sampling
+  K: 5
+  nu: 3.0
+  epsilon: 0.05
+  S: 20000
+  fit_fraction: 0.5
+  use_neff: true
+  tol: 1.0e-5
+  max_iter: 1000
+  n_repeats: 1
+  eval_batch_size: 1024
+  variance_floor: 1.0e-6
+  seed: 42
+  rng_block_size: null           # one estimator for all points
+
+grid:                            # density map of Figure 2a
+  x1_min: -6.0
+  x1_max: 5.0
+  x2_min: -5.0
+  x2_max: 5.0
+  n: 50

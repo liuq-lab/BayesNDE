@@ -1,0 +1,109 @@
+# BayesNDE tutorial: independent Gaussian mixture, p = 25 (Figure 4a of the paper).
+# Settings of `python -m experiments.simulation.indep_gmm highdim reproduce --dim 25`.
+
+data:                            # bayesnde.data.samplers.build_sampler
+  name: indep_gmm
+  seed: 1024
+  n: 20000                       # 81% train / 9% validation / 10% test
+  dim: 25
+  sd: 0.1
+  n_components: 3
+  bound: 1.0
+
+model:                           # bayesnde.training.generation_optimized.build_bgm_model
+  dataset: BGM_indep_gmm
+  output_dir: outputs/tutorial/indep_gmm_25d
+  random_seed: 1024
+  use_bnn: false
+  save_model: true
+  save_res: false
+  x_dim: 25
+  z_dim: 25
+  g_network_type: residual       # five width-256 residual blocks (p > 10)
+  e_network_type: residual
+  g_units: [256, 256, 256, 256, 256]
+  e_units: [256, 256, 256, 256, 256]
+  dx_units: [256, 256, 128, 64]
+  dz_units: [256, 256, 128, 64]
+  lr: 1.0e-3                     # EGM warm start
+  lr_theta: 5.0e-3               # iterative updating, generator
+  lr_z: 5.0e-3                   # iterative updating, latent variables
+  g_d_freq: 1
+  gamma: 0.0
+  alpha: 0.0
+  g_adv_weight: 1.0              # lambda_adv,x
+  e_adv_weight: 1.0              # lambda_adv,z
+  x_cycle_weight: 3.0            # lambda_rec,x
+  z_cycle_weight: 1.0            # lambda_rec,z
+  decorrelation_weight: 0.3      # lambda_corr
+  decorrelation_target: train
+  marginal_mmd_weight: 1000.0    # lambda_MMD,marg
+  mmd_scales: [0.05, 0.1, 0.2, 0.5, 1.0]
+  joint_mmd_weight: 100.0        # lambda_MMD,joint
+  sliced_wasserstein_weight: 300.0   # lambda_SW
+  sliced_wasserstein_projections: 64
+  sliced_wasserstein_seed: 20260831
+  variance_log_target: 0.01
+  variance_log_target_weight: 0.0    # lambda_var
+  variance_log_eps: 1.0e-8
+
+training:                        # stage 1, EGM warm start
+  batch_size: 256
+  egm_n_iter: 3000
+  egm_batches_per_eval: 50       # checkpoint and diagnostics interval
+
+iterative:                       # stage 2, iterative updating
+  batch_size: 256
+  epochs: 2000
+  save_epochs: [0, 1, 5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 250,
+                300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950,
+                1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500,
+                1550, 1600, 1650, 1700, 1750, 1800, 1850, 1900, 1950, 2000]
+  seed: 711024
+  lr_schedule: constant
+  lr_decay_power: 0.6
+  lr_decay_timescale: 10.0
+  optimizer: adam
+  weight_decay: 0.0
+  iterative_prior_mmd_weight: 1000.0     # lambda_PP
+  iterative_empirical_corr_weight: 0.3   # lambda_corr^iter
+
+generation_diagnostics:          # validation diagnostics used for checkpoint selection
+  n_samples: 5000
+  plots_enabled: false
+  umap_enabled: false
+  plot_reference_split: validation
+
+hmc_settings:                    # (a) posterior sampling
+  M: 1600                        # retained draws over all chains
+  burn_in: 800
+  num_chains: 4
+  step_size: 0.003
+  num_leapfrog_steps: 10
+  target_accept_prob: 0.75
+  initial_state: encoder
+  initial_state_scale: 0.01
+  min_effective_samples: 0
+  max_retries: 0
+  retry_multiplier: 1.5
+  strict_ess: false
+  proposal_covariance_floor: 1.0e-3
+
+density_bridge_eval:             # (b) adaptive proposal and (c) bridge sampling
+  K: 5
+  nu: 3.0
+  epsilon: 0.05
+  S: 20000
+  fit_fraction: 0.5
+  use_neff: true
+  tol: 1.0e-5
+  max_iter: 1000
+  n_repeats: 1
+  eval_batch_size: 1024
+  variance_floor: 0.01
+  seed: 42
+  rng_block_size: 100            # a fresh estimator every 100 points
+
+evaluation:                      # all test observations, as in the paper
+  test_points: 2000
+  test_seed: 8943
